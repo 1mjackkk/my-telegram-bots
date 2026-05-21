@@ -4420,20 +4420,38 @@ async def run_bots():
 
 
 if __name__ == "__main__":
-    # Render ka dynamic port uthane ke liye system
-    # Agar Render par port badlega, toh yeh apne aap use set kar lega
+    import http.server
+    import threading
+    import os
+
+    class HealthCheckHandler(http.server.BaseHTTPRequestHandler):
+        # Yeh GET request ka jawab dega
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"OK")
+
+        # 👇 YEH NYA HAI: Yeh UptimeRobot ki HEAD request ko handle karega aur 'Down' error hatayega
+        def do_HEAD(self):
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain")
+            self.end_headers()
+
+        def log_message(self, format, *args):
+            return  # Logs ko saaf rakhne ke liye
+
     def run_render_health_server():
         port = int(os.environ.get("PORT", 7860))
-        server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+        server = http.server.HTTPServer(("0.0.0.0", port), HealthCheckHandler)
         server.serve_forever()
 
-    # Tere purane function ki jagah ab yeh naye port wala server background thread mein chalega
+    # Server ko background thread mein start karna
     threading.Thread(target=run_render_health_server, daemon=True).start()
-    print("ℹ️ Render Dynamic Health Check Server Active!")
+    print("ℹ️ Render Dynamic Health Check Server Active with HEAD support!")
 
-    # Aapka bots chalane wala system bina kisi ched-chad ke
+    # Bots running system
     try:
         asyncio.run(run_bots())
     except KeyboardInterrupt:
         pass
-
