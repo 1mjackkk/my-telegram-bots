@@ -4420,8 +4420,20 @@ async def run_bots():
 
 
 if __name__ == "__main__":
-    threading.Thread(target=run_health_check_server, daemon=True).start()
+    # Render ka dynamic port uthane ke liye system
+    # Agar Render par port badlega, toh yeh apne aap use set kar lega
+    def run_render_health_server():
+        port = int(os.environ.get("PORT", 7860))
+        server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+        server.serve_forever()
+
+    # Tere purane function ki jagah ab yeh naye port wala server background thread mein chalega
+    threading.Thread(target=run_render_health_server, daemon=True).start()
+    print("ℹ️ Render Dynamic Health Check Server Active!")
+
+    # Aapka bots chalane wala system bina kisi ched-chad ke
     try:
         asyncio.run(run_bots())
     except KeyboardInterrupt:
         pass
+
