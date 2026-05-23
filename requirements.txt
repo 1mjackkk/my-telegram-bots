@@ -1,8 +1,0 @@
-python-telegram-bot
-pyrogram
-tgcrypto
-gTTS
-qrcode
-requests
-yt-dlp
-pytz
