@@ -1,15 +1,18 @@
-FROM ubuntu:22.04
+# 1. Base Image
+FROM python:3.10-slim
 
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip3 install --no-cache-dir python-telegram-bot pyTelegramBotAPI pyrogram telethon tgcrypto gTTS qrcode requests yt-dlp database-client pytz AsyncAndroid
-
+# 2. Working Directory
 WORKDIR /app
-COPY . /app
 
-EXPOSE 5000
+# 3. Requirements install karna
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python3", "Genoshu.py"]
+# 4. Saara code copy karna
+COPY . .
+
+# 5. Port open karna
+EXPOSE 8080
+
+# 6. Command: Gunicorn se Flask chalega aur python se aapki main file
+CMD gunicorn 40in1:app & python 40in1.py
